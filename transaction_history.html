@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Transaction History</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      color: #007bff;
+      font-size: 24px;
+      margin: 20px 0;
+    }
+
+    #filterContainer {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    #filterInput,
+    #descriptionSearch {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    table {
+      width: 100%;
+
+      border-collapse: collapse;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: #fff;
+      border-radius: 10px;
+      margin-bottom: 20px;
+
+
+      max-width: 1200px;
+      /* Tăng độ rộng tối đa của bảng */
+      margin: 0 auto;
+      /* Căn giữa bảng */
+      font-size: 16px;
+      /* Tăng kích thước chữ cho toàn bộ bảng */
+
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007bff;
+      margin-right: 20px;
+      font-size: 14px;
+    }
+
+    /* Custom styles for the filter section */
+    #filterContainer label {
+      margin-right: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    /* Apply custom styles to the select element */
+    #descriptionSearch {
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+
+    /* Style the hover effect for table rows */
+    tbody tr:hover {
+      background-color: #e0e0e0;
+      transition: background-color 0.3s;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      /* Tăng padding để các ô rộng hơn và dễ đọc hơn */
+      text-align: left;
+      border-right: 1px solid #ccc;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: none;
+      /* Loại bỏ đường kẻ bên phải của cột cuối cùng */
+    }
+
+    td.add {
+      color: green;
+    }
+
+    td.pay {
+      color: red;
+    }
+
+    a.back-to-home {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      text-decoration: none;
+      color: #007bff;
+      font-size: 14px;
+    }
+
+    /* .bach{
+    padding: 5px;
+    border: 1px solid #0074d9;
+    border-radius: 20px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+  } */
+  </style>
+</head>
+
+<body>
+  <h1>Transaction History</h1>
+  <div id="filterContainer">
+    <input class="bach" type="number" id="filterInput" placeholder="Search by Person ID">
+    <label>Description:</label>
+    <select name="description" id="descriptionSearch">
+      <option value="">All</option>
+      <option value="Tiền ăn">Trừ tiền ăn</option>
+      <option value="Nạp tiền">Nạp tiền</option>
+      <option value="Phạt tiền">Tiền phạt</option>
+      <option value="Tiền nước">Tiền nước</option>
+    </select>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Person ID</th>
+        <th>Transaction Date</th>
+        <th>Transaction Type</th>
+        <th>Transaction Amount</th>
+        <th>Name</th>
+        <th>Balance Change</th>
+        <th>Description</th>
+        <!-- <th>Account ID</th> -->
+      </tr>
+    </thead>
+    <tbody id="transactionHistoryTableBody">
+
+    </tbody>
+  </table>
+
+
+
+
+  <a href="home.html" class="back-to-home">Back to Home</a>
+  <script>
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    const accessToken = getCookie('accessToken');
+
+    const filterInput = document.getElementById('filterInput');
+    const desSearch = document.getElementById('descriptionSearch');
+    const tableBody = document.getElementById('transactionHistoryTableBody');
+
+    const headers = {
+      'Authorization': `Bearer ${accessToken}`
+    };
+
+
+
+    function fetchAndDisplayData(url) {
+      fetch(url, { headers })
+        .then(res => res.json())
+        .then(data => {
+          data.forEach(history => {
+            const transactionRow = `
+              <tr>
+                <td>${history.id}</td>
+                <td>${history.person.id}</td>
+                <td>${history.transactionDate}</td>
+                <td class="${history.transactionType === 'ADD' ? 'add' : 'pay'}">${history.transactionType}</td>
+                <td>${history.formattedTransactionAmount}</td>
+                <td>${history.person.name}</td>
+                <td>${history.formattedSubTotal}</td>
+                <td>${history.description}</td>
+              </tr>
+            `;
+
+            tableBody.insertAdjacentHTML('beforeend', transactionRow);
+          });
+        });
+    }
+
+    function filterTable() {
+      const filterNumber = filterInput.value;
+      const filterDescription = desSearch.value;
+      tableBody.innerHTML = '';
+
+      fetch('http://localhost:8080/persons/transactionHistory', { headers })
+        .then(res => res.json())
+        .then(data => {
+          data.forEach(history => {
+            if (
+              (history.person.id == filterNumber || filterNumber === '') &&
+              (history.description === filterDescription || filterDescription === '' || filterDescription === 'All')
+            ) {
+              const transactionList = `
+                <tr>
+                  <td>${history.id}</td>
+                  <td>${history.person.id}</td>
+                  <td>${history.transactionDate}</td>
+                  <td class="${history.transactionType === 'ADD' ? 'add' : 'pay'}">${history.transactionType}</td>
+                  <td>${history.formattedTransactionAmount}</td>
+                  <td>${history.person.name}</td>
+                  <td>${history.formattedSubTotal}</td>
+                  <td>${history.description}</td>
+                </tr>
+              `;
+              tableBody.insertAdjacentHTML('beforeend', transactionList);
+            }
+          });
+        })
+        .catch(error => console.log(error));
+    }
+
+    filterInput.addEventListener('input', filterTable);
+    desSearch.addEventListener('change', filterTable);
+
+    fetchAndDisplayData('http://localhost:8080/persons/transactionHistory');
+  </script>
+</body>
+
+</html>

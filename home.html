@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Home Page - TMGDTD Finance</title>
+  <script src="./../js/index.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 30px;
+      background-color: white;
+    }
+
+    h1 {
+      color: #007bff;
+    }
+
+    .finance-section {
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin: 20px auto;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #menu-button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      font-size: 16px;
+    }
+
+    #menu-button:hover {
+      background-color: #0056b3;
+      transform: scale(1.1);
+      /* Tăng kích thước nút khi hover */
+      transition: background-color 0.3s, transform 0.3s;
+      /* Thêm hiệu ứng chuyển đổi trong 0.3 giây */
+    }
+
+    #menu-items {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 10px;
+      animation: fade-in 0.5s ease;
+    }
+
+    #menu-items a {
+      margin: 10px;
+      padding: 15px 25px;
+      text-decoration: none;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #menu-items a:hover {
+      background-color: pink;
+    }
+
+    /* Styling for the "Powered By" paragraph */
+    .form-wrapper p {
+      font-size: 12px;
+      margin-top: 10px;
+      color: #666;
+    }
+
+    /* Animation for menu items fade-in */
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+  </style>
+</head>
+
+
+<body class="main-background">
+  <div class="finance-section">
+    <h1>Welcome to TMGDTD</h1>
+    
+    <!-- <button onclick="loadDoc()" id="menu-button">Menu</button> -->
+
+    <div id="menu-items">
+      <!-- <div id="menu-items" style="display: none;"></div> -->
+      <a href="/component/add_person.html">Thêm người dùng</a>
+      <!-- <a href="/component/register.html">Đăng ký tài khoản</a> -->
+      <a href="/component/get_all_persons.html">Danh sách tất cả người dùng</a>
+      <a href="/component/login_history.html">Lịch sử đăng nhập</a>
+      <a href="/component/calculate.html">Tính toán tiền</a>
+      <a href="/component/login_infor.html">Thông tin tài khoản đăng nhập</a>
+      <a href="/component/transaction_history.html">Lịch sử giao dịch</a>
+      <a href="/component/role.html">Phân quyền</a>
+      <a href="/component/update_history.html">Lịch sử thay đổi thông tin</a>
+      
+      <!-- <a href="https://wheelofnames.com/vi/" target="_blank">TRƯA NAY ĂN MÓN GÌ ???
+        <img src="../image/download.jfif" alt="">
+      </a> -->
+      <a href="https://wheelofnames.com/vi/" target="_blank" style="display: inline-block;">
+        <!-- <img src="../image/download.jfif" alt=""> -->
+        TRƯA NAY ĂN MÓN GÌ ???
+      </a>
+    </div>
+    <div class="form-wrapper">
+      <p>Powered By Bách Lê</p>
+    </div>
+  </div>
+  
+  <script>
+    const menuItems = document.getElementById('menu-items');
+  </script>
+</body>
+
+</html>
+
+
+

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login</title>
+</head>
+
+<body>
+    <div class="inner-form">
+        <form id="loginForm">
+            <h1>Login</h1>
+            <div class="inner-input">
+                <label for="userName">Username:</label>
+                <input type="text" name="userName" required>
+            </div>
+            <div class="inner-input">
+                <label for="password">Password:</label>
+                <input type="password" name="password" required>
+            </div>
+            <div>
+                <input class="inner-button" type="submit" value="Login">
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async event => {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const loginData = {};
+            formData.forEach((value, key) => {
+                loginData[key] = value;
+            });
+
+            try {
+                const response = await fetch('http://localhost:8080/persons/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                if (response.ok) {
+                    const responseData = await response.json();
+
+                    // Lưu token vào cookie
+                    document.cookie = `accessToken=${responseData.accessToken}; path=/;`;
+
+                    console.log('Login successfully');
+                    alert('Login successfully');
+                    window.location.href = "/component/home.html";
+                } else {
+                    console.error('Error:', response.statusText);
+                    alert('Login fail');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>

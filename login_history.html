@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Login History</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 30px 0;
+      color: #555;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 auto;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 255, 0.1);
+      /* Thay đổi màu xanh lá (#4CAF50) thành màu xanh dương (rgba(0, 0, 255, 0.1)) */
+    }
+
+    th,
+    td {
+      padding: 15px;
+      text-align: left;
+
+      border-bottom: 1px solid #ddd; /* Đường kẻ đen giữa các hàng */
+    border-right: 1px solid #ddd; /* Đường kẻ đen giữa các cột */
+    }
+
+    tr:hover {
+      background-color: #f2f2f2;
+      transition: background-color 0.3s ease;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8f8f8;
+    }
+
+    th {
+      background-color: #0074D9;
+      color: white;
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      color: #0074D9;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    a:hover {
+      color: #0056b3;
+      transition: color 0.3s ease;
+    }
+
+    @media screen and (max-width: 768px) {
+      h1 {
+        font-size: 24px;
+      }
+
+      table {
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        padding: 10px;
+      }
+
+      a {
+        font-size: 16px;
+      }
+    }
+    .bach{
+      padding: 5px;
+    border: 1px solid #0074d9;
+    border-radius: 20px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Login History</h1>
+  <input class="bach" type="number" id="filterInput" placeholder="Search by Account ID">
+  <table id="loginHistoryTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Account ID</th>
+        <th>Account name</th>
+        <th>Login time</th>
+      </tr>
+    </thead>
+    <tbody id="loginHistoryTableBody">
+
+    </tbody>
+  </table>
+  <a href="home.html">Back to Home</a>
+  <script>
+    function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        const accessToken = getCookie('accessToken');
+    const filterInput = document.getElementById('filterInput');
+    const tableBody = document.getElementById('loginHistoryTableBody');
+
+    
+    fetch(`http://localhost:8080/persons/loginHistory`, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    })
+      .then(res => {
+        return res.json();
+      })
+      .then(data => {
+        const tableBody = document.querySelector('#loginHistoryTable tbody');
+
+        data.forEach(loginHis => {
+          const loginHisRow = `
+            <tr>
+                <td>${loginHis.id}</td>
+                <td>${loginHis.account.id}</td>
+                <td>${loginHis.account.username}</td>
+                <td>${loginHis.loginDate}</td>
+            </tr>
+        `;
+          tableBody.insertAdjacentHTML('beforeend', loginHisRow);
+        });
+      })
+
+    function filterTable() {
+      const filterNumber = filterInput.value;
+      tableBody.innerHTML = '';
+
+      fetch(`http://localhost:8080/persons/loginHistory`, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    })
+        .then(res => res.json())
+        .then(data => {
+          data.forEach(loginHis => {
+            if (
+              (loginHis.account.id == filterNumber || filterNumber === '')
+            ) {
+              const loginHisList = `
+                <tr>
+                    <td>${loginHis.id}</td>
+                    <td>${loginHis.account.id}</td>
+                    <td>${loginHis.account.username}</td>
+                    <td>${loginHis.loginDate}</td>
+                </tr>
+              `;
+              tableBody.insertAdjacentHTML('beforeend', loginHisList);
+            }
+          });
+        })
+        .catch(error => console.log(error));
+    }
+
+    filterInput.addEventListener('input', filterTable);
+
+    fetchAndDisplayData('http://localhost:8080/persons/loginHistory');
+  </script>
+
+
+
+</body>
+
+</html>

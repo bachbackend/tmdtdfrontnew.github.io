@@ -1,0 +1,197 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Update User - Financial Theme</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 30px;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            color: #007bff;
+        }
+
+        form {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 500px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="tel"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        a {
+            display: block;
+            text-decoration: none;
+            margin-top: 20px;
+            color: #007bff;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .custom-date-input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            width: 100%;
+            /* Đảm bảo input ngày tháng rộng bằng container */
+        }
+
+        .custom-date-input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        /* Tùy chỉnh arrow của input date */
+        .custom-date-input::-webkit-calendar-picker-indicator {
+            filter: invert(0.3);
+            /* Đảo màu mũi tên để nó khớp với theme */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Update User</h1>
+    <div class="container">
+        <form id="updateUserForm">
+            <label for="name">Tên:</label>
+            <input type="text" id="name" name="name" required><br>
+
+            <label for="dob">Date of Birth: </label>
+            <input type="date" id="dob" name="dob" required class="custom-date-input"><br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required maxlength="50"><br>
+            <label for="phoneNumber">Số Điện Thoại:</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" required pattern="0\d{9}"
+                title="Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số"><br>
+
+
+            <button type="submit">Update</button>
+        </form>
+    </div>
+
+
+
+
+    <a href="get_all_persons.html">Back to list</a>
+
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        const accessToken = getCookie('accessToken');
+        const updateUserForm = document.querySelector("#updateUserForm");
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `http://localhost:8080/persons/${userId}`, true);
+        xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const userData = JSON.parse(xhr.responseText);
+                document.getElementById('name').value = userData.name;
+                document.getElementById('dob').value = userData.dob;
+
+                document.getElementById('email').value = userData.email;
+                document.getElementById('phoneNumber').value = userData.phoneNumber;
+            }
+        };
+        xhr.send();
+
+
+        updateUserForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const formData = new FormData(updateUserForm);
+            const updateUserUrl = `http://localhost:8080/persons/${userId}`;
+            const userData = {
+                name: formData.get("name"),
+                dob: formData.get("dob"),
+
+                email: formData.get("email"),
+                phoneNumber: formData.get("phoneNumber")
+            };
+
+            try {
+                // Lấy thông tin người dùng hiện tại trước khi cập nhật
+                const response = await fetch(`http://localhost:8080/persons/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+                const currentUser = await response.json();
+
+                // Cập nhật thông tin người dùng, bao gồm cả totalMoney
+                userData.totalMoney = currentUser.totalMoney;
+
+                const updateResponse = await fetch(updateUserUrl, {
+                    method: "PATCH", // Sử dụng method PATCH
+                    headers: {
+                        "Content-Type": "application/json",
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                if (updateResponse.ok) {
+                    const updatedUser = await updateResponse.json();
+                    console.log("Updated User:", updatedUser);
+                    alert('Dữ liệu đã được cập nhật thành công!');
+                    window.location.href = "get_all_persons.html";
+                } else {
+                    console.error("Error updating user:", updateResponse.statusText);
+                    alert('Dữ liệu cập nhật thất bại :<');
+                    // alert('Email hoặc số điện thoại có thể đã bị trùng!!!');
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

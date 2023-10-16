@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History</title>
+    <style>
+        body,
+        h1,
+        table {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Style for the header */
+        h1 {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            /* Add margin below the header */
+        }
+
+        /* Style for the table */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 0 auto;
+            /* Center the table */
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        /* Style for table header */
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* Style for table rows (alternating background color) */
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Style for the transaction history container */
+        #transactionHistory {
+            margin: 0 20px;
+            /* Add margin on both sides */
+        }
+
+        /* Style for the back link */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            text-decoration: none;
+            color: blue;
+        }
+
+        .back-button {
+            font-weight: bold;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            background-color: pink;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="header">
+
+    </div>
+    <div id="transactionHistory"></div>
+    <button class="back-button" onclick="window.location.href='get_all_persons.html'">Back to List</button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            const accessToken = getCookie('accessToken');
+
+            const userId = new URLSearchParams(window.location.search).get('id');
+
+            // fetch(`http://localhost:8080/persons/${userId}`)
+            fetch(`http://localhost:8080/persons/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json(); // Chuyển đổi dữ liệu JSON
+                })
+                .then((userData) => {
+                    const userName = userData.name;
+                    const headerDiv = document.getElementById("header");
+                    const h1 = document.createElement("h1");
+                    h1.textContent = `Transaction History of ${userName}`;
+                    headerDiv.appendChild(h1);
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                });
+
+            // fetch(`http://localhost:8080/persons/transactionHistory/${userId}`)
+            fetch(`http://localhost:8080/persons/transactionHistory/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    const transactionHistoryDiv = document.getElementById("transactionHistory");
+                    if (data.length === 0) {
+                        transactionHistoryDiv.innerText = "Không có giao dịch nào.";
+                        return;
+                    }
+
+                    // Tạo bảng để hiển thị các giao dịch
+                    const table = document.createElement("table");
+                    table.border = 1; // Thêm đường viền cho bảng
+
+                    // Tạo hàng tiêu đề
+                    const thead = document.createElement("thead");
+                    const headerRow = thead.insertRow();
+                    const headers = ["Person ID", "Person Name", "Transaction ID", "Transaction Date", "Transaction Amount", "Balance Change", "Transaction Type", "Description"];
+                    headers.forEach((headerText) => {
+                        const th = document.createElement("th");
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    table.appendChild(thead);
+
+                    // Tạo các hàng dữ liệu
+                    const tbody = document.createElement("tbody");
+                    data.forEach((transaction) => {
+                        const row = tbody.insertRow();
+                        const cellData = [
+                            transaction.person.id,
+                            transaction.person.name,
+                            transaction.id,
+                            transaction.transactionDate,
+                            transaction.formattedTransactionAmount,
+                            transaction.formattedSubTotal,
+                            transaction.transactionType,
+                            transaction.description,
+
+                        ];
+                        cellData.forEach((cellValue) => {
+                            const cell = row.insertCell();
+                            cell.textContent = cellValue;
+                        });
+                    });
+                    table.appendChild(tbody);
+
+                    // Hiển thị bảng giao dịch trên trang web
+                    transactionHistoryDiv.appendChild(table);
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                    // Xử lý lỗi nếu cần thiết
+                });
+        });
+    </script>
+</body>
+
+</html>
